@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Verification</title></head><body><pre id="results">PASS index.html no overflow at 1280
+PASS game initial lives
+PASS invalid guess preserves state
+PASS equal values count as correct
+PASS game ends after three losses
+PASS restart restores state and keeps best
+PASS random includes both endpoints
+PASS repeated restarts keep a single listener
+PASS .verification/changed-game.html no overflow at 1280
+PASS changed range and life constants
+PASS changed constants game ends
+PASS changed constants restart
+PASS task2.html no overflow at 1280
+PASS ten board cards rendered
+PASS fourth in-progress card blocked
+PASS limit counts hidden cards
+PASS moves and progress update
+PASS priority sorting
+PASS empty search state
+PASS new data renders and updates progress
+PASS task3.html no overflow at 1280
+PASS no errors on initial form
+PASS blur validates name
+PASS input clears touched error
+PASS submit counts errors and focuses first
+PASS sold-out date rejected
+PASS unavailable session rejected
+PASS sold-out ticket type rejected
+PASS seat limit rejected
+PASS fractional quantity rejected
+PASS email validation
+PASS unknown promo rejected
+PASS live discount total
+PASS valid booking created
+PASS success resets form
+PASS booking reduces remaining seats
+PASS index.html no overflow at 375
+PASS task2.html no overflow at 375
+PASS task3.html no overflow at 375
+PASS index.html no overflow at 1280
+PASS task2.html no overflow at 1280
+PASS task3.html no overflow at 1280
+TOTAL 42, FAILED 0</pre><script>
+const results = [], failures = [];
+function check(ok, label) { results.push((ok ? 'PASS ' : 'FAIL ') + label); if (!ok) failures.push(label); }
+async function page(file, width = 1280) {
+  const frame = document.createElement('iframe'); frame.width = width; frame.height = 1000;
+  frame.src = '../' + file; document.body.append(frame);
+  await new Promise(resolve => frame.onload = resolve);
+  const w = frame.contentWindow, d = w.document;
+  w.addEventListener('error', e => check(false, file + ': ' + e.message));
+  check(d.documentElement.scrollWidth <= d.documentElement.clientWidth, file + ' no overflow at ' + width);
+  return {w, d, el: id => d.getElementById(id)};
+}
+(async () => {
+  const g = await page('index.html'), {w, el} = g;
+  check(el('lives').textContent === '3', 'game initial lives');
+  el('guess-button').click(); check(el('lives').textContent === '3' && /Choose/.test(el('game-message').textContent), 'invalid guess preserves state');
+  w.eval('Math.random = () => (currentNumber - MIN_NUMBER) / (MAX_NUMBER - MIN_NUMBER + STEP)');
+  el('prediction').value = 'higher'; el('guess-button').click();
+  check(el('streak').textContent === '1' && /Equal/.test(el('game-message').textContent), 'equal values count as correct');
+  for (let i=0;i<3;i++) { w.eval('currentNumber = MAX_NUMBER; Math.random = () => 0'); el('guess-button').click(); }
+  check(el('guess-button').disabled && el('prediction').disabled && el('lives').textContent === '0', 'game ends after three losses');
+  el('restart-button').click(); check(el('lives').textContent === '3' && el('streak').textContent === '0' && el('best-streak').textContent === '1' && !el('guess-button').disabled, 'restart restores state and keeps best');
+  check(w.eval('Math.random = () => 0; randomNumber() === MIN_NUMBER') && w.eval('Math.random = () => .999999; randomNumber() === MAX_NUMBER'), 'random includes both endpoints');
+  for (let i=0;i<10;i++) el('restart-button').click();
+  el('prediction').value='higher'; w.eval('Math.random = () => (currentNumber - MIN_NUMBER) / (MAX_NUMBER - MIN_NUMBER + STEP)'); el('guess-button').click();
+  check(el('streak').textContent==='1','repeated restarts keep a single listener');
+  const changed = await page('.verification/changed-game.html');
+  check(changed.el('lives').textContent==='1' && Number(changed.el('current-number').textContent)>=40 && Number(changed.el('current-number').textContent)<=42,'changed range and life constants');
+  changed.w.eval('currentNumber = MAX_NUMBER; Math.random = () => 0'); changed.el('prediction').value='higher'; changed.el('guess-button').click();
+  check(changed.el('guess-button').disabled,'changed constants game ends'); changed.el('restart-button').click(); check(changed.el('lives').textContent==='1','changed constants restart');
+  const b = await page('task2.html');
+  check(b.d.querySelectorAll('.card').length === 10, 'ten board cards rendered');
+  b.d.querySelector('#task-1 button[data-status="progress"]').click();
+  check(/already has 3/.test(b.el('boardMessage').textContent), 'fourth in-progress card blocked');
+  b.el('tagFilter').value = 'Study'; b.el('tagFilter').dispatchEvent(new b.w.Event('change'));
+  b.d.querySelector('#task-7 button[data-status="progress"]').click(); check(/already has 3/.test(b.el('boardMessage').textContent), 'limit counts hidden cards');
+  b.el('tagFilter').value = 'all'; b.el('tagFilter').dispatchEvent(new b.w.Event('change'));
+  b.d.querySelector('#task-3 button[data-status="done"]').click(); b.d.querySelector('#task-1 button[data-status="progress"]').click();
+  check(b.el('boardProgress').value === 3 && /Moved/.test(b.el('boardMessage').textContent), 'moves and progress update');
+  b.el('prioritySort').value = 'low'; b.el('prioritySort').dispatchEvent(new b.w.Event('change'));
+  check(b.d.querySelector('.card .muted').textContent.includes('Low'), 'priority sorting');
+  b.el('taskSearch').value = 'zzzzzz'; b.el('taskSearch').dispatchEvent(new b.w.Event('input'));
+  check(b.d.querySelectorAll('.card').length === 0 && /No tasks/.test(b.el('boardCards').textContent), 'empty search state');
+  b.el('taskSearch').value=''; b.w.eval('tasks.push({id:11,title:"New task",priority:2,important:false,tags:["Study"],status:"todo"}); render()');
+  check(b.d.querySelectorAll('.card').length===11 && b.el('boardProgress').max===11,'new data renders and updates progress');
+  const t = await page('task3.html');
+  const set = (id,v) => { t.el(id).value=v; t.el(id).dispatchEvent(new t.w.Event('input',{bubbles:true})); };
+  const submit = () => t.el('ticket-form').dispatchEvent(new t.w.Event('submit',{bubbles:true,cancelable:true}));
+  check([...t.d.querySelectorAll('.field-error')].every(x=>!x.textContent) && t.el('error-summary').hidden, 'no errors on initial form');
+  set('fullName',' '); t.el('fullName').dispatchEvent(new t.w.Event('blur')); check(t.el('fullName').getAttribute('aria-invalid')==='true','blur validates name');
+  set('fullName','Islambek Saitov'); check(t.el('fullName').getAttribute('aria-invalid')==='false','input clears touched error');
+  submit(); check(/3 field/.test(t.el('error-summary').textContent) && t.d.activeElement === t.el('event'), 'submit counts errors and focuses first');
+  set('event','web'); set('date','2026-11-04'); check(/sold out/.test(t.el('date-error').textContent),'sold-out date rejected');
+  set('date','2026-11-05'); check(/not available/.test(t.el('date-error').textContent),'unavailable session rejected');
+  set('event','game'); set('ticketType','vip'); check(/sold out/.test(t.el('ticketType-error').textContent),'sold-out ticket type rejected');
+  set('event','web'); set('date','2026-11-03'); set('ticketType','standard'); set('quantity','7'); check(/Only 6/.test(t.el('quantity-error').textContent),'seat limit rejected');
+  set('quantity','1.5'); check(t.el('quantity').getAttribute('aria-invalid')==='true','fractional quantity rejected');
+  set('quantity','2'); set('email','invalid'); check(t.el('email').getAttribute('aria-invalid')==='true','email validation');
+  set('email','islambek@example.com'); set('promoCode','bad'); submit(); check(/Unknown/.test(t.el('promoCode-error').textContent),'unknown promo rejected');
+  set('promoCode',' student10 '); check(/3,600 KZT/.test(t.el('ticket-preview').textContent),'live discount total');
+  submit(); check(!t.el('ticket-result').hidden && /AITU-\d{6}/.test(t.el('ticket-result').textContent) && /3,600 KZT/.test(t.el('ticket-result').textContent),'valid booking created');
+  check(t.el('event').value==='' && t.el('error-summary').hidden,'success resets form');
+  set('event','web'); set('date','2026-11-03'); set('quantity','5'); set('fullName','Islambek Saitov'); set('email','islambek@example.com'); submit();
+  check(/Only 4/.test(t.el('quantity-error').textContent),'booking reduces remaining seats');
+  for (const width of [375,1280]) for (const file of ['index.html','task2.html','task3.html']) await page(file,width);
+  document.getElementById('results').textContent = results.join('\n') + '\nTOTAL ' + results.length + ', FAILED ' + failures.length;
+})().catch(e => document.getElementById('results').textContent = results.join('\n') + '\nERROR ' + e.stack);
+</script><iframe width="1280" height="1000" src="../index.html"></iframe>
+<iframe width="1280" height="1000" src="../.verification/changed-game.html"></iframe><iframe width="1280" height="1000" src="../task2.html"></iframe><iframe width="1280" height="1000" src="../task3.html"></iframe><iframe width="375" height="1000" src="../index.html"></iframe><iframe width="375" height="1000" src="../task2.html"></iframe><iframe width="375" height="1000" src="../task3.html"></iframe><iframe width="1280" height="1000" src="../index.html"></iframe><iframe width="1280" height="1000" src="../task2.html"></iframe><iframe width="1280" height="1000" src="../task3.html"></iframe></body></html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event tickets | Islambek's Study Hub</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script src="task3.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html">Islambek's Study Hub</a>
+      <nav aria-label="Main navigation">
+        <a href="index.html">1 Game</a>
+        <a href="task2.html">2 Study board</a>
+        <a href="task3.html" class="active" aria-current="page">3 Event tickets</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <div class="page-header">
+      <p class="muted">Assignment 5 / Task 3 / Option A</p>
+      <h1>Event tickets</h1>
+      <p>Choose a study event and check your ticket before booking.</p>
+    </div>
+    <div class="ticket-layout">
+      <section class="panel" aria-labelledby="booking-heading">
+        <h2 id="booking-heading">Book a ticket</h2>
+        <form id="ticket-form">
+          <p id="error-summary" class="message error" role="alert" hidden></p>
+          <div class="form-grid">
+            <div class="field">
+              <label for="event">Event</label>
+              <select id="event" name="event" required aria-invalid="false" aria-describedby="event-error">
+                <option value="">Choose an event</option>
+                <option value="web">JavaScript Workshop</option>
+                <option value="game">Study Game Night</option>
+              </select>
+              <p id="event-error" class="field-error"></p>
+            </div>
+            <div class="field">
+              <label for="date">Date</label>
+              <input id="date" name="date" type="date" required aria-invalid="false" aria-describedby="date-help date-error">
+              <p id="date-help" class="muted"></p>
+              <p id="date-error" class="field-error"></p>
+            </div>
+            <div class="field">
+              <label for="ticketType">Ticket type</label>
+              <select id="ticketType" name="ticketType" required aria-invalid="false" aria-describedby="type-help ticketType-error">
+                <option value="standard">Standard</option>
+                <option value="vip">VIP</option>
+              </select>
+              <p id="type-help" class="muted"></p>
+              <p id="ticketType-error" class="field-error"></p>
+            </div>
+            <div class="field">
+              <label for="quantity">Quantity</label>
+              <input id="quantity" name="quantity" type="number" value="1" min="1" step="1" required aria-invalid="false" aria-describedby="quantity-error">
+              <p id="quantity-error" class="field-error"></p>
+            </div>
+            <div class="field">
+              <label for="fullName">Full name</label>
+              <input id="fullName" name="fullName" type="text" minlength="2" maxlength="60" autocomplete="name" required aria-invalid="false" aria-describedby="fullName-error">
+              <p id="fullName-error" class="field-error"></p>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required aria-invalid="false" aria-describedby="email-error">
+              <p id="email-error" class="field-error"></p>
+            </div>
+            <div class="field">
+              <label for="promoCode">Promo code (optional)</label>
+              <input id="promoCode" name="promoCode" type="text" aria-invalid="false" aria-describedby="promo-help promoCode-error">
+              <p id="promo-help" class="muted">STUDENT10 saves 10%; AITU20 saves 20%.</p>
+              <p id="promoCode-error" class="field-error"></p>
+            </div>
+          </div>
+          <button type="submit">Create ticket</button>
+        </form>
+      </section>
+      <aside class="panel preview" aria-labelledby="preview-heading">
+        <h2 id="preview-heading">Live preview</h2>
+        <div id="ticket-preview" aria-live="polite"></div>
+        <p class="muted">Demo bookings and seat counts last until the page is reloaded.</p>
+      </aside>
+    </div>
+    <section id="ticket-result" class="panel result success" tabindex="-1" aria-live="polite" hidden></section>
+  </main>
+</body>
+</html>

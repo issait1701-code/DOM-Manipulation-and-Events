@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Higher or Lower | Study Hub</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script src="task1.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html">Islambek's Study Hub</a>
+      <nav aria-label="Main navigation">
+        <a class="active" aria-current="page" href="index.html">1 Game</a>
+        <a href="task2.html">2 Study board</a>
+        <a href="task3.html">3 Event tickets</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <div class="page-header">
+      <p class="muted">Assignment 5 / Task 1 / Option A</p>
+      <h1>Higher or Lower</h1>
+      <p>A short number game for a study break.</p>
+    </div>
+    <section class="panel game-panel" aria-labelledby="game-title">
+      <h2 id="game-title">Guess the next number</h2>
+      <p id="game-rules" class="muted"></p>
+      <div class="scoreboard" aria-label="Game statistics">
+        <div><span>Lives</span><strong id="lives"></strong></div>
+        <div><span>Streak</span><strong id="streak"></strong></div>
+        <div><span>Best streak</span><strong id="best-streak"></strong></div>
+      </div>
+      <div id="number-box" class="number-box">
+        <span>Current number</span>
+        <strong id="current-number"></strong>
+        <span id="previous-number" class="muted"></span>
+      </div>
+      <div class="controls game-controls">
+        <div class="field">
+          <label for="prediction">Your guess</label>
+          <select id="prediction">
+            <option value="">Choose higher or lower</option>
+            <option value="higher">Higher</option>
+            <option value="lower">Lower</option>
+          </select>
+        </div>
+        <button id="guess-button" type="button">Check guess</button>
+        <button id="restart-button" class="secondary" type="button">Restart</button>
+      </div>
+      <p id="game-message" class="message" role="status" aria-live="polite"></p>
+      <p class="muted small">The best streak is kept until you reload this page.</p>
+    </section>
+  </main>
+</body>
+</html>

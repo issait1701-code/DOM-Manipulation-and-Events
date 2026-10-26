@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Higher or Lower | Study Hub</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../styles.css">
+  
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html">Islambek's Study Hub</a>
+      <nav aria-label="Main navigation">
+        <a class="active" aria-current="page" href="index.html">1 Game</a>
+        <a href="task2.html">2 Study board</a>
+        <a href="task3.html">3 Event tickets</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <div class="page-header">
+      <p class="muted">Assignment 5 / Task 1 / Option A</p>
+      <h1>Higher or Lower</h1>
+      <p>A short number game for a study break.</p>
+    </div>
+    <section class="panel game-panel" aria-labelledby="game-title">
+      <h2 id="game-title">Guess the next number</h2>
+      <p id="game-rules" class="muted"></p>
+      <div class="scoreboard" aria-label="Game statistics">
+        <div><span>Lives</span><strong id="lives"></strong></div>
+        <div><span>Streak</span><strong id="streak"></strong></div>
+        <div><span>Best streak</span><strong id="best-streak"></strong></div>
+      </div>
+      <div id="number-box" class="number-box">
+        <span>Current number</span>
+        <strong id="current-number"></strong>
+        <span id="previous-number" class="muted"></span>
+      </div>
+      <div class="controls game-controls">
+        <div class="field">
+          <label for="prediction">Your guess</label>
+          <select id="prediction">
+            <option value="">Choose higher or lower</option>
+            <option value="higher">Higher</option>
+            <option value="lower">Lower</option>
+          </select>
+        </div>
+        <button id="guess-button" type="button">Check guess</button>
+        <button id="restart-button" class="secondary" type="button">Restart</button>
+      </div>
+      <p id="game-message" class="message" role="status" aria-live="polite"></p>
+      <p class="muted small">The best streak is kept until you reload this page.</p>
+    </section>
+  </main>
+<script>// Change these constants to change the game rules.
+const MIN_NUMBER = 40;
+const MAX_NUMBER = 42;
+const START_LIVES = 1;
+const ZERO = 0;
+const STEP = 1;
+
+const prediction = document.getElementById("prediction");
+const guessButton = document.getElementById("guess-button");
+const restartButton = document.getElementById("restart-button");
+const message = document.getElementById("game-message");
+const numberBox = document.getElementById("number-box");
+
+let lives = START_LIVES;
+let streak = ZERO;
+let bestStreak = ZERO;
+let currentNumber = randomNumber();
+let previousNumber = null;
+
+function randomNumber() {
+  return Math.floor(Math.random() * (MAX_NUMBER - MIN_NUMBER + STEP)) + MIN_NUMBER;
+}
+
+function showMessage(text, type) {
+  message.textContent = text;
+  message.classList.remove("success", "error");
+  if (type) {
+    message.classList.add(type);
+  }
+}
+
+function renderGame() {
+  document.getElementById("game-rules").textContent =
+    `Numbers are from ${MIN_NUMBER} to ${MAX_NUMBER}. You have ${START_LIVES} lives. Equal numbers count as a correct guess.`;
+  document.getElementById("lives").textContent = lives;
+  document.getElementById("streak").textContent = streak;
+  document.getElementById("best-streak").textContent = bestStreak;
+  document.getElementById("current-number").textContent = currentNumber;
+  document.getElementById("previous-number").textContent =
+    previousNumber === null ? "Make your first guess." : `Previous number: ${previousNumber}`;
+  guessButton.disabled = lives === ZERO;
+  prediction.disabled = lives === ZERO;
+}
+
+function makeGuess() {
+  if (lives === ZERO) {
+    showMessage("The game is over. Press Restart to play again.", "error");
+    return;
+  }
+
+  const choice = prediction.value;
+  if (choice !== "higher" && choice !== "lower") {
+    showMessage("Choose Higher or Lower first. No life was lost.", "error");
+    return;
+  }
+
+  const nextNumber = randomNumber();
+  let feedback;
+  let correct;
+
+  // Three outcomes: equal, correct direction, or wrong direction.
+  if (nextNumber === currentNumber) {
+    correct = true;
+    feedback = `Equal: ${currentNumber} and ${nextNumber}. Your guess counts as correct!`;
+  } else if ((choice === "higher" && nextNumber > currentNumber) ||
+             (choice === "lower" && nextNumber < currentNumber)) {
+    correct = true;
+    feedback = `Correct! ${currentNumber} became ${nextNumber}.`;
+  } else {
+    correct = false;
+    feedback = `Wrong guess. ${currentNumber} became ${nextNumber}. You lost a life.`;
+  }
+
+  if (correct) {
+    streak += STEP;
+    bestStreak = Math.max(bestStreak, streak);
+  } else {
+    lives -= STEP;
+    streak = ZERO;
+  }
+
+  previousNumber = currentNumber;
+  currentNumber = nextNumber;
+  numberBox.classList.toggle("win", correct);
+  numberBox.classList.toggle("loss", !correct);
+  if (lives === ZERO) {
+    feedback += ` Game over. Best streak: ${bestStreak}. Press Restart.`;
+  }
+  showMessage(feedback, correct ? "success" : "error");
+  renderGame();
+}
+
+function restartGame() {
+  lives = START_LIVES;
+  streak = ZERO;
+  currentNumber = randomNumber();
+  previousNumber = null;
+  prediction.value = "";
+  numberBox.classList.remove("win", "loss");
+  showMessage("New game. Choose a direction and check your guess.", "");
+  renderGame();
+  prediction.focus();
+}
+
+guessButton.addEventListener("click", makeGuess);
+restartButton.addEventListener("click", restartGame);
+showMessage("Choose a direction and check your guess.", "");
+renderGame();
+</script></body>
+</html>
